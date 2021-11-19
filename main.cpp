@@ -1,14 +1,19 @@
 #include <iostream>
 #include <vector>
+#include <random>
+#include <time.h>
 
 using namespace std;
 
 int PSL = 9999;
 double MF = 0;
-int L = 8;
+int L = 2501;
 int nfesLmt = 1000000;
+int nfes = 0;
+int seed = 0;
 vector <int> sequence;
 vector <vector<int>> sosedi;
+vector <vector<int>> kandidati;
 vector <int> bestPSLSequence;
 vector <int> bestMFSequence;
 
@@ -24,21 +29,54 @@ void sequenceFill(){
 }
 
 void getSosede(){
-    for(int i = 0; i < L; i++){
-        if (sequence[i] = -1){
-            sosedi[i][i] = 1;
+    kandidati.push_back(sosedi[0]);
+    for(int i = 1; i <= L; i++){
+        if (sequence[i-1] == -1){
+            sosedi[i][i-1] = 1;
         }
         else{
-            sosedi[i][i] = -1;
+            sosedi[i][i-1] = -1;
+        }
+        try {
+            kandidati.push_back(sosedi[i]);
+        }catch (bad_alloc){
+            cout << "Ran out of memory!" << endl;
         }
     }
+    sosedi.clear();
+}
+
+void randomize(){
+    random_device rd;
+    mt19937 mt(seed+nfes);
+    uniform_int_distribution<int> dist(0,1);
+    for ( int i = 0; i < L; i++){
+        sequence.push_back(dist(mt));
+    }
+    //for (auto it = sequence.begin(); it != sequence.end(); ++it)
+    //    cout << ' ' << *it;
+    //cout << endl;
 }
 
 void getRandomSequence(int L){
-    for ( int i = 0; i < L; i++){
-        sosedi.push_back(sequence);
+    while (nfes < nfesLmt){
+        randomize();
+        for ( int i = 0; i <= L; i++){
+            if(nfes < nfesLmt){
+                sosedi.push_back(sequence);
+                nfes++;
+            }
+        }
+        getSosede();
+        sequence.clear();
     }
-    getSosede();
+    cout <<endl<< "nfes: "<<nfes<< endl;
+    //for (int i = 0; i < 22; i++){
+    //    for (int j = 0; j < L; j++){
+    //        cout << kandidati[i][j] <<", ";
+    //    }
+    //    cout << endl;
+    //}
 }
 
 void getMF(vector <int> sequence, double ckVsota){
@@ -84,8 +122,11 @@ void Ck(vector <int> sequence){
 }
 
 int main() {
-    sequenceFill();
-    Ck(sequence);
+    cout << "enter seed: " << endl;
+    cin >> seed;
+    //sequenceFill();
+    getRandomSequence(L);
+    //Ck(sequence);
     //sequenceFill();
     //vector <double> cks;
     //int temp = 0;
@@ -99,5 +140,6 @@ int main() {
     //for (int i = 0; i < L - 1; i++){
     //    cout << cks[i] << ";";
     //}
+    cout << "dela";
     return 0;
 }

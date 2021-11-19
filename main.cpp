@@ -2,6 +2,8 @@
 #include <vector>
 #include <random>
 #include <time.h>
+#include <thread>
+#include <mutex>
 
 using namespace std;
 
@@ -11,11 +13,13 @@ int L = 2501;
 int nfesLmt = 1000000;
 int nfes = 0;
 int seed = 0;
+int threads = 0;
 vector <int> sequence;
 vector <vector<int>> sosedi;
 vector <vector<int>> kandidati;
 vector <int> bestPSLSequence;
 vector <int> bestMFSequence;
+mutex myMutex;
 
 void sequenceFill(){
     sequence.push_back(1);
@@ -37,13 +41,13 @@ void getSosede(){
         else{
             sosedi[i][i-1] = -1;
         }
-        try {
-            kandidati.push_back(sosedi[i]);
-        }catch (bad_alloc){
-            cout << "Ran out of memory!" << endl;
-        }
+        //try {
+        //    kandidati.push_back(sosedi[i]);
+        //}catch (bad_alloc){
+        //    cout << "Ran out of memory!" << nfes << endl;
+        //}
     }
-    sosedi.clear();
+    //sosedi.clear();
 }
 
 void randomize(){
@@ -56,27 +60,6 @@ void randomize(){
     //for (auto it = sequence.begin(); it != sequence.end(); ++it)
     //    cout << ' ' << *it;
     //cout << endl;
-}
-
-void getRandomSequence(int L){
-    while (nfes < nfesLmt){
-        randomize();
-        for ( int i = 0; i <= L; i++){
-            if(nfes < nfesLmt){
-                sosedi.push_back(sequence);
-                nfes++;
-            }
-        }
-        getSosede();
-        sequence.clear();
-    }
-    cout <<endl<< "nfes: "<<nfes<< endl;
-    //for (int i = 0; i < 22; i++){
-    //    for (int j = 0; j < L; j++){
-    //        cout << kandidati[i][j] <<", ";
-    //    }
-    //    cout << endl;
-    //}
 }
 
 void getMF(vector <int> sequence, double ckVsota){
@@ -114,11 +97,60 @@ void Ck(vector <int> sequence){
         ck = 0;
     }
     if (ckHigh < PSL){
+        myMutex.lock();
         PSL = ckHigh;
         bestPSLSequence = sequence;
+        myMutex.unlock();
     }
-    getMF(sequence, ckVsota);
-    cout << "\n" << "best PSL: " << PSL;
+    //getMF(sequence, ckVsota);
+}
+
+void threadRun(int from, int to){
+    while (from < to){
+        Ck(sosedi[from]);
+        from++;
+    }
+}
+
+void exeThreads(int threads){
+    vector<thread>guide;
+    int from = 0;
+    int to = L/threads-1;
+    int multi = L/threads;
+    for (int i = 0; i < threads; i++){
+        guide.push_back(thread (threadRun, from, to));
+        from = to+1;
+        to += multi;
+    }
+    for (int i = 0; i < threads; i++){
+        guide[i].join();
+    }
+    for (int i = 0; i < threads; i++){
+        guide.pop_back();
+    }
+}
+
+void getRandomSequence(int L){
+    while (nfes < nfesLmt){
+        randomize();
+        for ( int i = 0; i <= L; i++){
+            if(nfes < nfesLmt){
+                sosedi.push_back(sequence);
+                nfes++;
+            }
+        }
+        getSosede();
+        exeThreads(threads);
+        sequence.clear();
+        sosedi.clear();
+    }
+    cout <<endl<< "nfes: "<<nfes<< endl;
+    //for (int i = 0; i < 22; i++){
+    //    for (int j = 0; j < L; j++){
+    //        cout << kandidati[i][j] <<", ";
+    //    }
+    //    cout << endl;
+    //}
 }
 
 int main() {
@@ -140,6 +172,7 @@ int main() {
     //for (int i = 0; i < L - 1; i++){
     //    cout << cks[i] << ";";
     //}
+    cout << "\n" << "best PSL: " << PSL;
     cout << "dela";
     return 0;
 }

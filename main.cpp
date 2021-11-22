@@ -83,7 +83,6 @@ void Ck(vector <int> sequence){
         for(int i = 0; i < L-k; i++){
             ck += sequence[i] * sequence[i+k];
         }
-        cout << ck << "; ";
         if (ck <0){
             ck = -ck;
         }
@@ -156,6 +155,8 @@ void getRandomSequence(int L){
 int main() {
     cout << "enter seed: " << endl;
     cin >> seed;
+    cout << "enter threads: " << endl;
+    cin >> threads;
     //sequenceFill();
     getRandomSequence(L);
     //Ck(sequence);

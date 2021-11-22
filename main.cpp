@@ -1,11 +1,11 @@
 #include <iostream>
 #include <vector>
 #include <random>
-#include <time.h>
 #include <thread>
 #include <mutex>
 
 using namespace std;
+using namespace std::chrono;
 
 int PSL = 9999;
 double MF = 0;
@@ -56,6 +56,11 @@ void randomize(){
     uniform_int_distribution<int> dist(0,1);
     for ( int i = 0; i < L; i++){
         sequence.push_back(dist(mt));
+    }
+    for ( int i = 0; i < L; i++){
+        if(sequence[i] == 0){
+            sequence[i] = -1;
+        }
     }
     //for (auto it = sequence.begin(); it != sequence.end(); ++it)
     //    cout << ' ' << *it;
@@ -140,10 +145,11 @@ void getRandomSequence(int L){
         }
         getSosede();
         exeThreads(threads);
+        cout <<endl<< "nfes: "<<nfes<< endl;
+        cout << "\n" << "best PSL: " << PSL;
         sequence.clear();
         sosedi.clear();
     }
-    cout <<endl<< "nfes: "<<nfes<< endl;
     //for (int i = 0; i < 22; i++){
     //    for (int j = 0; j < L; j++){
     //        cout << kandidati[i][j] <<", ";
@@ -158,7 +164,11 @@ int main() {
     cout << "enter threads: " << endl;
     cin >> threads;
     //sequenceFill();
+    auto start = high_resolution_clock::now();
     getRandomSequence(L);
+    auto stop = high_resolution_clock::now();
+    auto duration = duration_cast<seconds>(stop - start);
+    cout << "Duration in seconds:" << duration.count() << endl;
     //Ck(sequence);
     //sequenceFill();
     //vector <double> cks;

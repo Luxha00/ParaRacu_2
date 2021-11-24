@@ -9,7 +9,7 @@ using namespace std::chrono;
 
 int PSL = 9999;
 double MF = 0;
-int L = 6;
+int L = 5;
 int nfesLmt = 1000000;
 int nfes = 0;
 int seed = 0;
@@ -22,11 +22,10 @@ vector <int> bestMFSequence;
 mutex myMutex;
 
 void sequenceFill(){
-    sequence.push_back(1);
-    sequence.push_back(-1);
-    sequence.push_back(-1);
     sequence.push_back(-1);
     sequence.push_back(1);
+    sequence.push_back(-1);
+    sequence.push_back(-1);
     sequence.push_back(-1);
 }
 
